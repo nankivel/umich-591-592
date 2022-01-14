@@ -1,7 +1,7 @@
 import pandas as pd
 import requests as re
 import pprint as pp
-from datetime import date, datetime
+from datetime import date
 import os
 env_var = os.environ
 
@@ -16,21 +16,9 @@ def pull_tweet_counts(query, start_time = None, end_time = None, granularity = '
     # We need to get academic research access to get entire history as well as a larger api limit
 
     if start_time is None:
-        base_url = f'https://api.twitter.com/2/tweets/counts/recent?query={query}&granularity={granularity}'
+        base_url = f'https://api.twitter.com/2/tweets/counts/all?query={query}&granularity={granularity}'
         response = re.get(base_url, headers = headers)
         return pd.DataFrame(response.json()['data'])
-
-
-#pulls raw tweets and saves to pickle file
-def pull_raw_tweets(query, start_time = None, end_time = None ):
-    #Uses standard search API. 
-    #documentation https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
-    if start_time is None: 
-        base_url = f'https://api.twitter.com/2/tweets/search/recent/?query={query}&tweet.fields=created_at&expansions=author_id&user.fields=description&place.fields=country' 
-        response = re.get(base_url, headers = headers)
-        j = response.json()
-        df = pd.DataFrame(j['data'])
-        df.to_pickle(f'{query}_data.pkl')
 
 
 def get_tweets(stock_ticker, date, max_results=10):
@@ -42,11 +30,20 @@ def get_tweets(stock_ticker, date, max_results=10):
     return df
 
 
-def write_tweets(stock_ticker, date, file_path, max_results=10):
+def write_stock_daily_tweets(stock_ticker, date, file_path, max_results=10):
     df = get_tweets(stock_ticker, date, max_results)
     df.to_pickle(file_path)
 
+
+def list_business_days(start_date, end_date=date.today()):
+    start_date = pd.to_datetime(start_date)
+    datelist = pd.bdate_range(start_date, periods=1000).tolist()
+    return [x for x in datelist if x < pd.Timestamp(end_date)]
+
+
 if __name__ == '__main__':
-    pull_raw_tweets('TSLA')
-    df = pd.read_pickle('TSLA_data.pkl')
-    print(df)
+    # pull_raw_tweets('TSLA')
+    # df = pd.read_pickle('TSLA_data.pkl')
+    # print(df)
+    print(pull_tweet_counts('TSLA'))
+    pass
