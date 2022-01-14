@@ -21,7 +21,7 @@ def conduct_sentiment_analysis(df):
     df['sentiment'] = df['text'].apply(lambda x: analyzer.polarity_scores(x))
     df['positive'] = df['sentiment'].apply(lambda x: x['pos'])
     df['negative'] = df['sentiment'].apply(lambda x: x['neg'])
-    df['compound'] = df['sentiment'].apply(lambda x: x['compound'])
+    df['neutral'] = df['sentiment'].apply(lambda x: x['neu'])
     return df
 
 def sentiment_by_minute(df):
@@ -30,7 +30,8 @@ def sentiment_by_minute(df):
     df['hour'] = df['created_at'].dt.hour
     df['minute'] = df['created_at'].dt.minute
     df['date'] = df['created_at'].dt.date
-    df = df.groupby(['date', 'hour', 'minute']).mean()
+    df = df.groupby(['date', 'hour', 'minute']).agg({'positive' : 'mean', 'neutral': 'mean', 'negative' : 'mean', 'id' : 'nunique'})
+    df.reset_index(inplace = True)
     return df
 
 
