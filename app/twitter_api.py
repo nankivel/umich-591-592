@@ -1,11 +1,11 @@
 import pandas as pd
 import requests as re
-import json
 import pprint as pp
+from datetime import date, datetime
+import os
+env_var = os.environ
 
-api_key = 'gYRKFJvCkWkvgAADVRtPMzO3X'
-api_key_secret = 'p4tFlh6n7R8n3NtjNL8F1o3GOgHF4zSrogbZOFbzeVINCbD5XD'
-token = 'AAAAAAAAAAAAAAAAAAAAAExZXwEAAAAAlPNNzcxPq%2F1%2FYewFwvRl49RYwdA%3Dg9nPclqkeynaGHyJdWGNyg3cr2AIfDD7epEzdwPWv0GdLDGWso'
+token = os.environ["TWITTER_TOKEN"]
 
 headers = {
         "Authorization" : "Bearer " + token
