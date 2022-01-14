@@ -33,6 +33,18 @@ def pull_raw_tweets(query, start_time = None, end_time = None ):
         df.to_pickle(f'{query}_data.pkl')
 
 
+def get_tweets(stock_ticker, date, max_results=10):
+    # get tweets up to max_results for stock_ticker on a specific date
+    base_url = f'https://api.twitter.com/2/tweets/search/all?query={stock_ticker}&start_time={date}T00:00:00.000Z&end_time={date}T23:59:59.999Z&max_results={max_results}&tweet.fields=created_at&expansions=author_id'
+    response = re.get(base_url, headers = headers)
+    j = response.json()
+    df = pd.DataFrame(j['data'])
+    return df
+
+
+def write_tweets(stock_ticker, date, file_path, max_results=10):
+    df = get_tweets(stock_ticker, date, max_results)
+    df.to_pickle(file_path)
 
 if __name__ == '__main__':
     pull_raw_tweets('TSLA')
