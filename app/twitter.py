@@ -49,7 +49,7 @@ def get_tweets(stock_ticker, date):
 
     while next_token is not None:
         query_params['next_token'] = next_token
-        time.sleep(5)
+        time.sleep(1)
         j = connect_to_endpoint(search_url, query_params)
         df = df.append(pd.DataFrame(j['data']))
         print(f'got total {len(df)} records for {stock_ticker} on {date}')
@@ -82,6 +82,7 @@ def main():
                 date=d, 
                 file_path=file_path
                 )
+                time.sleep(300)
 
 if __name__ == '__main__':
     main()
