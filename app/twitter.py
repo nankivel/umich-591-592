@@ -23,8 +23,8 @@ bearer_token = os.environ.get("TWITTER_TOKEN")
 search_url = "https://api.twitter.com/2/tweets/search/all"
 
 # total seconds in 15-minute window divided by 
-# full-archive search rate limit of 300 per 15-minute window
-sleep_time = (15 * 60) / 300 
+# full-archive search rate limit of 150 per 15-minute window
+sleep_time = (15 * 60) / 150 
 
 def bearer_oauth(r):
     """
