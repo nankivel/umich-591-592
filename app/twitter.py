@@ -4,7 +4,17 @@ from datetime import date
 import time
 import os
 from pathlib import Path
+import logging
 import constants
+
+# logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
 
 # To set your environment variables in your terminal run the following line:
 # export 'TWITTER_TOKEN'='<your_bearer_token>'
@@ -12,8 +22,9 @@ bearer_token = os.environ.get("TWITTER_TOKEN")
 
 search_url = "https://api.twitter.com/2/tweets/search/all"
 
-# Optional params: start_time,end_time,since_id,until_id,max_results,next_token,
-# expansions,tweet.fields,media.fields,poll.fields,place.fields,user.fields
+# total seconds in 15-minute window divided by 
+# full-archive search rate limit of 300 per 15-minute window
+sleep_time = (15 * 60) / 300 
 
 def bearer_oauth(r):
     """
@@ -45,14 +56,14 @@ def get_tweets(stock_ticker, date):
     j_initial = connect_to_endpoint(search_url, query_params)
     df = pd.DataFrame(j_initial['data'])
     next_token = j_initial['meta'].get('next_token')
-    print(f'got initial {len(df)} records for {stock_ticker} on {date}')
+    logging.info(f'got initial {len(df)} records for {stock_ticker} on {date}')
 
     while next_token is not None:
         query_params['next_token'] = next_token
-        time.sleep(1)
+        time.sleep(sleep_time)
         j = connect_to_endpoint(search_url, query_params)
         df = df.append(pd.DataFrame(j['data']))
-        print(f'got total {len(df)} records for {stock_ticker} on {date}')
+        logging.info(f'got total {len(df)} records for {stock_ticker} on {date}')
         next_token = j['meta'].get('next_token')
 
     return df
@@ -76,13 +87,12 @@ def main():
             file_path = f'~/Downloads/{s}_{d.year}-{str(d.month).zfill(2)}-{str(d.day).zfill(2)}.pkl'
             file_test = Path(file_path).expanduser()
             if file_test.is_file():
-                print(f'{file_test} already exists.')
+                logging.info(f'{file_test} already exists.')
             else:
                 write_stock_daily_tweets(stock_ticker=s, 
                 date=d, 
                 file_path=file_path
                 )
-                time.sleep(300)
 
 if __name__ == '__main__':
     main()
