@@ -37,10 +37,17 @@ def bearer_oauth(r):
     return r
 
 
-def connect_to_endpoint(url, params):
-    response = requests.request("GET", url, auth=bearer_oauth, params=params)
-    if response.status_code != 200:
-        raise Exception(response.status_code, response.text)
+def connect_to_endpoint(url, params, retries=10):
+    for i in range(retries):
+        response = requests.request("GET", url, auth=bearer_oauth, params=params)
+        if response.status_code == 429:
+            logging.info('Too many reqests error, will retry in 60 seconds.')
+            time.sleep(60)
+            i += 1
+            continue
+
+        # if response.status_code != 200:
+        #     raise Exception(response.status_code, response.text)
     return response.json()
 
 
@@ -94,6 +101,7 @@ def main():
                 date=d, 
                 file_path=file_path
                 )
+
 
 if __name__ == '__main__':
     main()
