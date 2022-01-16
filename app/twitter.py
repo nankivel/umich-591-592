@@ -40,15 +40,16 @@ def bearer_oauth(r):
 def connect_to_endpoint(url, params, retries=10):
     for i in range(retries):
         response = requests.request("GET", url, auth=bearer_oauth, params=params)
-        if response.status_code == 429:
-            logging.info('Too many reqests error, will retry in 60 seconds.')
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 429:
+            logging.info('Too many reqests error, will retry in 1 minute.')
             time.sleep(60)
             i += 1
             continue
 
         # if response.status_code != 200:
         #     raise Exception(response.status_code, response.text)
-    return response.json()
 
 
 def get_tweets(stock_ticker, date):
