@@ -1,3 +1,3 @@
 
 
-list_stocks = ['TSLA','RIVN','LCID','FSR','NKLA']
+list_stocks = ['RIVN','LCID','FSR','NKLA','TSLA']
