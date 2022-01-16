@@ -33,8 +33,7 @@ def bearer_oauth(r):
     return r
 
 
-def connect_to_endpoint(url, params, retries=100):
-    retry_sleep_seconds = 60
+def connect_to_endpoint(url, params, retries=100, retry_sleep_seconds = 30):
     for i in range(retries):
         response = requests.request("GET", url, auth=bearer_oauth, params=params)
         if response.status_code == 200:
