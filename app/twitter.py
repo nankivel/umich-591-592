@@ -21,6 +21,7 @@ logging.basicConfig(
 bearer_token = os.environ.get("TWITTER_TOKEN")
 
 search_url = "https://api.twitter.com/2/tweets/search/all"
+count_url = "https://api.twitter.com/2/tweets/counts/all"
 
 
 def bearer_oauth(r):
@@ -67,6 +68,29 @@ def get_tweets(stock_ticker, date):
         j = connect_to_endpoint(search_url, query_params)
         df = df.append(pd.DataFrame(j['data']))
         logging.info(f'got total {len(df)} records for {stock_ticker} on {date}')
+        next_token = j['meta'].get('next_token')
+
+    return df
+
+
+def get_tweet_counts(stock_ticker, start_date, end_date, granularity = 'day'):
+    query_params = {
+        'query': stock_ticker,
+        'start_time': f'{start_date}T00:00:00.000Z',
+        'end_time': f'{end_date}T23:59:59.999Z',
+        'max_results': 50 # range 10 to 50
+    }
+    j_initial = connect_to_endpoint(count_url, query_params)
+    df = pd.DataFrame(j_initial['data'])
+    next_token = j_initial['meta'].get('next_token')
+    logging.info(f'got initial {len(df)} records for {stock_ticker}')
+
+    while next_token is not None:
+        query_params['next_token'] = next_token
+        time.sleep(1)
+        j = connect_to_endpoint(count_url, query_params)
+        df = df.append(pd.DataFrame(j['data']))
+        logging.info(f'got total {len(df)} records for {stock_ticker}')
         next_token = j['meta'].get('next_token')
 
     return df
