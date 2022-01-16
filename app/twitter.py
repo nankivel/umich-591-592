@@ -22,10 +22,6 @@ bearer_token = os.environ.get("TWITTER_TOKEN")
 
 search_url = "https://api.twitter.com/2/tweets/search/all"
 
-# total seconds in 15-minute window divided by 
-# full-archive search rate limit of 150 per 15-minute window
-# sleep_time = (15 * 60) / 300
-sleep_time = 1 
 
 def bearer_oauth(r):
     """
@@ -37,22 +33,21 @@ def bearer_oauth(r):
     return r
 
 
-def connect_to_endpoint(url, params, retries=10):
+def connect_to_endpoint(url, params, retries=100):
+    retry_sleep_seconds = 60
     for i in range(retries):
         response = requests.request("GET", url, auth=bearer_oauth, params=params)
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 429:
-            logging.info('Too many reqests error, will retry in 1 minute.')
-            time.sleep(60)
+            logging.info(f'Too many reqests error, will retry in {retry_sleep_seconds} seconds.')
+            time.sleep({retry_sleep_seconds})
             i += 1
             continue
 
-        # if response.status_code != 200:
-        #     raise Exception(response.status_code, response.text)
-
 
 def get_tweets(stock_ticker, date):
+    sleep_time = 1
     date = date.strftime("%Y-%m-%d")
     query_params = {
         'query': stock_ticker,
