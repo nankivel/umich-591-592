@@ -41,7 +41,7 @@ def connect_to_endpoint(url, params, retries=100):
             return response.json()
         elif response.status_code == 429:
             logging.info(f'Too many reqests error, will retry in {retry_sleep_seconds} seconds.')
-            time.sleep({retry_sleep_seconds})
+            time.sleep(retry_sleep_seconds)
             i += 1
             continue
 
