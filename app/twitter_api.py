@@ -43,22 +43,24 @@ def list_business_days(start_date, end_date=date.today()):
     return [x for x in datelist if x < pd.Timestamp(end_date)]
 
 
-def pull_tweet_counts(query, granularity = 'day'):
-    base_url = f'https://api.twitter.com/2/tweets/counts/all?query={query}&granularity={granularity}'
+def pull_tweet_counts(query, date, granularity = 'day'):
+    base_url = f'https://api.twitter.com/2/tweets/counts/all?query={query}&granularity={granularity}&start_time={date}T00:00:00.000Z'
+    print(base_url)
     response = re.get(base_url, headers = headers)
     return pd.DataFrame(response.json()['data'])
 
 
 if __name__ == '__main__':
-    # TODO: figure out why I'm still only getting 10 tweets, maybe I need to specify max results. Could use the counts function to get an accurate max_results value
-    list_days = list_business_days(start_date='2021-10-01')
-    for s in constants.list_stocks:
-        for d in list_days:
-            file_path = f'~/Downloads/{s}_{d.year}-{str(d.month).zfill(2)}-{str(d.day).zfill(2)}.pkl'
-            file_test = Path(file_path).expanduser()
-            if not file_test.is_file():
-                write_stock_daily_tweets(stock_ticker=s, 
-                date=d, 
-                file_path=file_path,
-                max_results=None
-                )
+    print(pull_tweet_counts('TSLA', '2021-10-24'))
+    # # TODO: figure out why I'm still only getting 10 tweets, maybe I need to specify max results. Could use the counts function to get an accurate max_results value
+    # list_days = list_business_days(start_date='2021-10-01')
+    # for s in constants.list_stocks:
+    #     for d in list_days:
+    #         file_path = f'~/Downloads/{s}_{d.year}-{str(d.month).zfill(2)}-{str(d.day).zfill(2)}.pkl'
+    #         file_test = Path(file_path).expanduser()
+    #         if not file_test.is_file():
+    #             write_stock_daily_tweets(stock_ticker=s, 
+    #             date=d, 
+    #             file_path=file_path,
+    #             max_results=None
+    #             )
