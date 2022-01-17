@@ -74,6 +74,7 @@ def get_tweets(stock_ticker, date):
 
 
 def get_tweet_counts(stock_ticker, start_date, end_date, granularity = 'day'):
+    # TODO: figure out proper params for count endpoint
     query_params = {
         'query': stock_ticker,
         'start_time': f'{start_date}T00:00:00.000Z',
