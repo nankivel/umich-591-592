@@ -1,10 +1,10 @@
 import pandas as pd
 import vaderSentiment
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import constants
+import datetime as dt
 
-
-def scrub_data(pickle_filepath):
-    df = pd.read_pickle(pickle_filepath)
+def scrub_data(df):
     #Remove twitter handles- we dont want to do sentiment analysis on these
     df['text'] = df['text'].str.replace('@[^\s]+', "", regex = True)
     #Scrub retweet tag
@@ -24,21 +24,42 @@ def conduct_sentiment_analysis(df):
     df['neutral'] = df['sentiment'].apply(lambda x: x['neu'])
     return df
 
-def sentiment_by_minute(df):
+def sentiment_by_hour(df):
     #df['created_at'] = df['created_at'].dt.minute
-    df['created_at'] = pd.to_datetime(df['created_at'])
-    df['hour'] = df['created_at'].dt.hour
-    df['minute'] = df['created_at'].dt.minute
-    df['date'] = df['created_at'].dt.date
-    df = df.groupby(['date', 'hour', 'minute']).agg({'positive' : 'mean', 'neutral': 'mean', 'negative' : 'mean', 'id' : 'nunique'})
+    df['created_at'] = pd.to_datetime(df['created_at']).dt.strftime('%Y-%m-%d %H')
+    df = df.groupby(['created_at']).agg({'positive' : 'mean', 'neutral': 'mean', 'negative' : 'mean', 'id' : 'nunique'})
+    df.rename(columns = {'id' : 'count'}, inplace = True)
     df.reset_index(inplace = True)
     return df
 
+def sentiment_by_pkl(pickle_filepath):
+    #merge above 3 functions and conduct sentiment analysis
+    df = pd.read_pickle(pickle_filepath)
+    df = scrub_data(df)
+    df = conduct_sentiment_analysis(df)
+    df = sentiment_by_hour(df)
+    return df
+    
+def ticker_full_sentiment(ticker):
+    li = []
+    delta = dt.timedelta(days = 1)
+    start_date = constants.start_date
+    while start_date <= constants.end_date:
+        path = f'data/raw/twitter/{ticker}_{start_date}.pkl'
+        try:
+            df_temp = sentiment_by_pkl(path)
+            li.append(df_temp)
+        except:
+            print(f'Error: {path}')
+        start_date += delta
+    fin_df = pd.concat(li)
+    fin_df.to_pickle(f'data/processed/twitter/{ticker}.pkl')
+
+def main():
+    for ticker in constants.list_stocks:
+        ticker_full_sentiment(ticker)
 
 if __name__ == '__main__':
-    df = scrub_data('TSLA_data.pkl')
-    df = conduct_sentiment_analysis(df)
-    df = sentiment_by_minute(df)
-    print(df)
+    main()
 
     
