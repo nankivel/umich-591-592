@@ -44,6 +44,8 @@ def connect_to_endpoint(url, params, retries=100, retry_sleep_seconds = 30):
             time.sleep(retry_sleep_seconds)
             i += 1
             continue
+        else:
+            return response.status_code
 
 
 def get_tweets(stock_ticker, date):
@@ -58,19 +60,23 @@ def get_tweets(stock_ticker, date):
     }
 
     j_initial = connect_to_endpoint(search_url, query_params)
-    df = pd.DataFrame(j_initial['data'])
-    next_token = j_initial['meta'].get('next_token')
-    logging.info(f'got initial {len(df)} records for {stock_ticker} on {date}')
+    try:
+        df = pd.DataFrame(j_initial['data'])
+        next_token = j_initial['meta'].get('next_token')
+        logging.info(f'got initial {len(df)} records for {stock_ticker} on {date}')
 
-    while next_token is not None:
-        query_params['next_token'] = next_token
-        time.sleep(sleep_time)
-        j = connect_to_endpoint(search_url, query_params)
-        df = df.append(pd.DataFrame(j['data']))
-        logging.info(f'got total {len(df)} records for {stock_ticker} on {date}')
-        next_token = j['meta'].get('next_token')
+        while next_token is not None:
+            query_params['next_token'] = next_token
+            time.sleep(sleep_time)
+            j = connect_to_endpoint(search_url, query_params)
+            df = df.append(pd.DataFrame(j['data']))
+            logging.info(f'got total {len(df)} records for {stock_ticker} on {date}')
+            next_token = j['meta'].get('next_token')
 
-    return df
+        return df 
+
+    except KeyError as e:
+        return None
 
 
 def get_tweet_counts(stock_ticker, start_date, end_date, granularity = 'day'):
@@ -99,7 +105,10 @@ def get_tweet_counts(stock_ticker, start_date, end_date, granularity = 'day'):
 
 def write_stock_daily_tweets(stock_ticker, date, file_path):
     df = get_tweets(stock_ticker, date)
-    df.to_pickle(file_path)
+    if df is None:
+        logging.info(f'No data for {stock_ticker} on {date}')
+    else:
+        df.to_pickle(file_path)
 
 
 def list_business_days(start_date, end_date=date.today()):
