@@ -5,7 +5,7 @@ import datetime as dt
 import numpy as np
 
 def pull_data(ticker):
-    df = yf.download(tickers=ticker, period='1y', interval='1h', start = dt.datetime(2021, 10, 1))
+    df = yf.download(tickers=ticker, period='1y', interval='1h', start = constants.start_date)
     df.to_pickle(f'data/raw/stocks/{ticker}.pkl')
 
 def calculate_hourly_returns(df):
@@ -27,3 +27,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    

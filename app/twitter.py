@@ -109,7 +109,7 @@ def list_business_days(start_date, end_date=date.today()):
 
 
 def main():
-    list_days = list_business_days(start_date='2021-10-01')
+    list_days = list_business_days(start_date=constants.start_date)
     for s in constants.list_stocks:
         for d in list_days:
             file_path = f'~/Downloads/{s}_{d.year}-{str(d.month).zfill(2)}-{str(d.day).zfill(2)}.pkl'
