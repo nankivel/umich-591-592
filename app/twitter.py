@@ -69,9 +69,12 @@ def get_tweets(stock_ticker, date):
             query_params['next_token'] = next_token
             time.sleep(sleep_time)
             j = connect_to_endpoint(search_url, query_params)
-            df = df.append(pd.DataFrame(j['data']))
-            logging.info(f'got total {len(df)} records for {stock_ticker} on {date}')
-            next_token = j['meta'].get('next_token')
+            try:
+                df = df.append(pd.DataFrame(j['data']))
+                logging.info(f'got total {len(df)} records for {stock_ticker} on {date}')
+                next_token = j['meta'].get('next_token')
+            except KeyError as e:
+                return None
 
         return df 
 
